@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">V Chat</string>
+    <string name="something_went_wrong">Something went wrong!</string>
+    <string name="invalid_username_or_pass">Invalid username or password</string>
+    <string name="post_not_found">Post not found on server database</string>
+</resources>

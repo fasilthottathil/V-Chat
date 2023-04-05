@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "325953456364",
+    "project_id": "v-chat-d383a",
+    "storage_bucket": "v-chat-d383a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:325953456364:android:58ff312dd0105f40733dc9",
+        "android_client_info": {
+          "package_name": "com.vchat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "325953456364-tmd9thqt7ntgls7rur35pt2nl745ggn9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWdVQrrVEbOTvecsvFxEwxmtEpqQdzNbI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "325953456364-tmd9thqt7ntgls7rur35pt2nl745ggn9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
