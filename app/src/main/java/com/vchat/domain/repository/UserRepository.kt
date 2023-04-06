@@ -16,4 +16,5 @@ interface UserRepository {
     suspend fun createUser(user: User): Response<UserEntity>
     suspend fun getUserFromServer(email: String): Response<UserEntity>
     suspend fun getUserFromLocal(id: String): Flow<UserEntity?>
+    suspend fun getUserByIdFromLocal(id: String): UserEntity?
 }

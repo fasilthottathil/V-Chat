@@ -1,13 +1,8 @@
 package com.vchat.utils
 
 import android.Manifest
-import android.content.Intent
-import android.net.Uri
-import android.provider.MediaStore
 import android.util.Patterns
 import androidx.activity.ComponentActivity
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.MutableState
 import androidx.navigation.NavOptions
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken

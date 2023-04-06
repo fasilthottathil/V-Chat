@@ -18,10 +18,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.ShapeDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +32,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import coil.compose.rememberAsyncImagePainter
 import com.vchat.data.local.db.entity.PostEntity
+import com.vchat.presentation.components.LoadingDialog
+import com.vchat.presentation.components.MessageDialog
 import com.vchat.ui.theme.Primary
 import com.vchat.utils.requestPermissions
 
@@ -42,7 +41,15 @@ import com.vchat.utils.requestPermissions
  * Created by Fasil on 03/04/23.
  */
 @Composable
-fun AddEditPost(post: State<PostEntity?>, onBackPressed: () -> Unit) {
+fun AddEditPost(
+    post: State<PostEntity?>,
+    error: State<String?>,
+    loading: State<Boolean>,
+    resetError: () -> Unit,
+    onProductAddOrUpdated: State<Boolean>,
+    onClickDone: (PostEntity, Uri?) -> Unit,
+    onBackPressed: () -> Unit
+) {
 
     val context = LocalContext.current
     val selectedImageUri = remember { mutableStateOf<Uri?>(null) }
@@ -52,6 +59,33 @@ fun AddEditPost(post: State<PostEntity?>, onBackPressed: () -> Unit) {
             selectedImageUri.value = it
         }
     )
+
+    val postEntity = if (post.value != null) {
+        post.value!!
+    } else {
+        PostEntity()
+    }
+
+
+    SideEffect {
+        if (onProductAddOrUpdated.value) {
+            onBackPressed()
+        }
+    }
+
+    val showErrorMessage = remember {
+        mutableStateOf(false)
+    }
+
+    showErrorMessage.value = error.value != null
+
+    if (showErrorMessage.value) {
+        MessageDialog(message = error.value.toString()) { resetError() }
+    }
+
+    if (loading.value) {
+        LoadingDialog()
+    }
 
     Column(
         modifier = Modifier
@@ -79,7 +113,7 @@ fun AddEditPost(post: State<PostEntity?>, onBackPressed: () -> Unit) {
                 contentDescription = null,
                 modifier = Modifier
                     .clip(CircleShape)
-                    .clickable { }
+                    .clickable { onClickDone(postEntity, selectedImageUri.value) }
             )
             Spacer(modifier = Modifier.width(6.dp))
         }
@@ -136,14 +170,16 @@ fun AddEditPost(post: State<PostEntity?>, onBackPressed: () -> Unit) {
             }
         }
         Spacer(modifier = Modifier.height(12.dp))
-        val mContent = if (post.value != null && post.value?.content != null) {
-            post.value?.content
-        } else{
-            ""
+        val content = if (post.value == null) {
+            remember {
+                mutableStateOf( "")
+            }
+        } else {
+            remember {
+                mutableStateOf(post.value?.content ?: "")
+            }
         }
-        val content = remember {
-            mutableStateOf(mContent.toString())
-        }
+        postEntity.content = content.value
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -179,5 +215,14 @@ fun AddEditPostPreview() {
     val post = remember {
         mutableStateOf(null)
     }
-    AddEditPost(post) {}
+    val error = remember {
+        mutableStateOf(null)
+    }
+    val loading = remember {
+        mutableStateOf(false)
+    }
+    val onProductAddOrUpdated = remember {
+        mutableStateOf(false)
+    }
+    AddEditPost(post, error, loading, {}, onProductAddOrUpdated, { _, _ -> }) {}
 }

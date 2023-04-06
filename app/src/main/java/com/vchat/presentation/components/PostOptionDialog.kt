@@ -48,14 +48,13 @@ fun PostOptionDialog(userId: String?, postUserId: String, onOptionSelected: (Pos
                 Box(modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onOptionSelected(PostDialogOption.VIEW_PROFILE) }
-                    .height(40.dp), contentAlignment = Alignment.Center) {
+                    .height(40.dp).border(width = 0.5.dp, color = Color.Black), contentAlignment = Alignment.Center) {
                     Text(text = "View Profile", fontSize = 16.sp, color = Color.Black)
                 }
                 Box(modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onOptionSelected(PostDialogOption.CLOSE) }
-                    .height(40.dp)
-                    .border(width = 0.5.dp, color = Color.Black), contentAlignment = Alignment.Center) {
+                    .height(40.dp), contentAlignment = Alignment.Center) {
                     Text(text = "Close", fontSize = 16.sp, color = Color.Red)
                 }
             } else {
@@ -86,5 +85,5 @@ fun PostOptionDialog(userId: String?, postUserId: String, onOptionSelected: (Pos
 @Preview
 @Composable
 fun PostOptionDialogPreview() {
-    PostOptionDialog("", "1") { }
+    PostOptionDialog("1", "1") { }
 }

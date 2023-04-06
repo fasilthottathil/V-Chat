@@ -28,7 +28,7 @@ interface PostDao {
     @Query("SELECT id FROM posts WHERE ROWID = (SELECT MAX(ROWID) FROM POSTS)")
     fun getLastPostId(): String?
 
-    @Query("SELECT * FROM posts")
+    @Query("SELECT * FROM posts ORDER BY createdOn DESC")
     fun getPostsPaginated(): PagingSource<Int, PostEntity>
 
     @Query("SELECT * FROM posts WHERE content LIKE '%' || :searchQuery || '%'")
@@ -37,7 +37,7 @@ interface PostDao {
     @Query("SELECT * FROM posts WHERE content LIKE '%' || :searchQuery || '%'")
     fun searchPosts(searchQuery: String): List<PostEntity>
 
-    @Query("SELECT * FROM posts WHERE id = :postId LIMIT 1")
+    @Query("SELECT * FROM posts WHERE id = :postId")
     fun getPostById(postId: String): PostEntity?
 
 }

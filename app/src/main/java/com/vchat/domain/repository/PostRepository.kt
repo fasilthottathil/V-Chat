@@ -1,5 +1,6 @@
 package com.vchat.domain.repository
 
+import android.net.Uri
 import androidx.paging.PagingData
 import com.vchat.common.Response
 import com.vchat.data.local.db.entity.PostEntity
@@ -30,4 +31,6 @@ interface PostRepository {
     suspend fun upsertPosts(postEntityList: List<PostEntity>)
     suspend fun searchPost(searchQuery: String): List<PostEntity>
     suspend fun getPostById(postId: String): PostEntity?
+    suspend fun updatePost(post: Post): Response<PostEntity>
+    suspend fun uploadPostImage(postImageUri: Uri, postId: String): Response<String>
 }

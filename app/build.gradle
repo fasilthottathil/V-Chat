@@ -129,6 +129,9 @@ dependencies {
         //paging
         implementation "androidx.paging:paging-compose:1.0.0-alpha18"
 
+        implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.22"
+
+
 
     }
 

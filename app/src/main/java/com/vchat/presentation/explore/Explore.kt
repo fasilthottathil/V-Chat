@@ -42,6 +42,7 @@ fun Explore(
     userID: String?,
     searchPost: (String) -> Unit,
     deletePost: (PostEntity) -> Unit,
+    editPost: (PostEntity) -> Unit,
     addPost: () -> Unit
 ) {
     Scaffold(floatingActionButton = {
@@ -99,7 +100,7 @@ fun Explore(
                         ) { option ->
                             showPostOptionDialog.value = false
                             when (option) {
-                                PostDialogOption.EDIT -> {}
+                                PostDialogOption.EDIT -> editPost(post.value)
                                 PostDialogOption.DELETE -> deletePost(post.value)
                                 PostDialogOption.VIEW_PROFILE -> {}
                                 else -> {}
@@ -135,6 +136,6 @@ fun ExplorePreview() {
     Explore(
         modifier = Modifier,
         error, loading, {}, pagingItems = pagingItems.collectAsLazyPagingItems(),
-        userID = "", {}, {}, {}
+        userID = "", {}, {}, {}, {}
     )
 }

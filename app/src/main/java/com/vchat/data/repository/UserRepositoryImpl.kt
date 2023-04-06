@@ -116,4 +116,8 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun getUserFromLocal(id: String): Flow<UserEntity?> {
         return appDatabase.userDao().getUserByIdFlow(id)
     }
+
+    override suspend fun getUserByIdFromLocal(id: String): UserEntity? {
+        return appDatabase.userDao().getUserById(id)
+    }
 }

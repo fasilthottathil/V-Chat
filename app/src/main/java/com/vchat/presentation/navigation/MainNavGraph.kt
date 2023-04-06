@@ -43,6 +43,7 @@ fun MainNavGraph(navHostController: NavHostController, modifier: Modifier) {
                 userID = exploreViewModel.userID,
                 searchPost = { exploreViewModel.search(it) },
                 deletePost = { exploreViewModel.deletePost(it) },
+                editPost = { navHostController.navigate(NavRoute.AddEditPost.route.replace("{postID}", it.id)) },
                 addPost = { navHostController.navigate(NavRoute.AddEditPost.route) }
             )
         }
@@ -56,7 +57,14 @@ fun MainNavGraph(navHostController: NavHostController, modifier: Modifier) {
             val addEditPostViewModel: AddEditPostViewModel = hiltViewModel()
             addEditPostViewModel.getPostById(it.arguments?.getString("postID"))
             AddEditPost(
-                post = addEditPostViewModel.post.collectAsStateWithLifecycle()
+                post = addEditPostViewModel.post.collectAsStateWithLifecycle(),
+                error = addEditPostViewModel.error,
+                loading = addEditPostViewModel.loading,
+                resetError = { addEditPostViewModel.resetError() },
+                onProductAddOrUpdated = addEditPostViewModel.onProductAddOrUpdated,
+                onClickDone = { postEntity, uri ->
+                    addEditPostViewModel.addOrEditPost(postEntity, uri)
+                }
             ) { navHostController.popBackStack() }
         }
     }
