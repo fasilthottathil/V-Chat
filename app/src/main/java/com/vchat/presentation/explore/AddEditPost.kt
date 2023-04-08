@@ -36,6 +36,7 @@ import com.vchat.presentation.components.LoadingDialog
 import com.vchat.presentation.components.MessageDialog
 import com.vchat.ui.theme.Primary
 import com.vchat.utils.requestPermissions
+import kotlinx.coroutines.delay
 
 /**
  * Created by Fasil on 03/04/23.
@@ -67,8 +68,9 @@ fun AddEditPost(
     }
 
 
-    SideEffect {
+    LaunchedEffect(onProductAddOrUpdated.value) {
         if (onProductAddOrUpdated.value) {
+            delay(40)
             onBackPressed()
         }
     }
@@ -80,7 +82,7 @@ fun AddEditPost(
     showErrorMessage.value = error.value != null
 
     if (showErrorMessage.value) {
-        MessageDialog(message = error.value.toString()) { resetError() }
+        MessageDialog(message = error.value.orEmpty()) { resetError() }
     }
 
     if (loading.value) {
@@ -103,7 +105,7 @@ fun AddEditPost(
             )
             Spacer(modifier = Modifier.width(20.dp))
             Text(
-                text = "Add Post",
+                text = if (post.value == null) "Add Post" else "Edit Post",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f)

@@ -88,7 +88,7 @@ fun Long.formatTimestamp(): String {
 
     val diffInHours = diffInMinutes / 60
     if (diffInHours < 24) {
-        return "$diffInHours hrs ago"
+        return "$diffInHours ${if (diffInHours.toInt() == 1) "hr" else "hrs"} ago"
     }
 
     val diffInDays = diffInHours / 24
@@ -96,21 +96,21 @@ fun Long.formatTimestamp(): String {
         return "yesterday"
     }
     if (diffInDays < 7) {
-        return "$diffInDays days ago"
+        return "$diffInDays ${if (diffInDays.toInt() == 1) "day" else "days"} ago"
     }
 
     val diffInWeeks = diffInDays / 7
     if (diffInWeeks < 4) {
-        return "$diffInWeeks weeks ago"
+        return "$diffInWeeks ${if (diffInWeeks > 1) "weeks" else "week"} ago"
     }
 
     val diffInMonths = diffInDays / 30
     if (diffInMonths < 12) {
-        return "$diffInMonths months ago"
+        return "$diffInMonths ${if (diffInMonths > 1) "months" else "month"} ago"
     }
 
     val diffInYears = diffInDays / 365
-    return "$diffInYears years ago"
+    return "$diffInYears ${if (diffInYears > 1) "years" else "year"} ago"
 }
 
 

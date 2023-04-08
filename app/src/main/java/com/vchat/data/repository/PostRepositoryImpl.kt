@@ -14,11 +14,10 @@ import com.vchat.common.Response
 import com.vchat.data.local.db.AppDatabase
 import com.vchat.data.local.db.entity.PostEntity
 import com.vchat.data.models.Post
+import com.vchat.data.paging.post.PostByIdRemoteMediator
 import com.vchat.data.paging.post.PostRemoteMediator
 import com.vchat.domain.repository.PostRepository
-import com.vchat.domain.usecase.posts.GetLastPostIdFromLocalUseCase
-import com.vchat.domain.usecase.posts.GetPostsPaginatedUseCase
-import com.vchat.domain.usecase.posts.UpsertPostsUseCase
+import com.vchat.domain.usecase.posts.*
 import com.vchat.utils.mapObjectTo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -141,8 +140,46 @@ class PostRepositoryImpl @Inject constructor(
         return Response.Error(resources.getString(R.string.something_went_wrong))
     }
 
+    override suspend fun getPostsByUserIdPaginated(nextPage: String?, userId: String): Response<List<PostEntity>> {
+        kotlin.runCatching {
+            return@runCatching if (nextPage == null) {
+                firebaseFirestore.collection(Constants.POSTS)
+                    .whereEqualTo("userId", userId)
+                    .limit(20)
+                    .get()
+                    .await()
+            } else {
+                firebaseFirestore.collection(Constants.POSTS)
+                    .limit(20)
+                    .whereEqualTo("userId", userId)
+                    .orderBy("id")
+                    .startAfter(nextPage)
+                    .get()
+                    .await()
+            }
+        }.onSuccess {
+            val chatEntityList = mutableListOf<PostEntity>()
+            it?.toObjects(Post::class.java)?.mapObjectTo<List<Post>, List<PostEntity>>()
+                ?.let { entities ->
+                    CoroutineScope(Dispatchers.IO).launch {
+                        appDatabase.postDao().upsertPosts(entities)
+                    }
+                    chatEntityList.addAll(entities)
+                    return Response.Success(chatEntityList)
+                }
+        }.onFailure {
+            Timber.e(it)
+            return Response.Error(it.message.toString())
+        }
+        return Response.Error(resources.getString(R.string.something_went_wrong))
+    }
+
     override suspend fun getLastPostId(): String? {
         return appDatabase.postDao().getLastPostId()
+    }
+
+    override suspend fun getLastPostIdByUserId(userId: String): String? {
+        return appDatabase.postDao().getLastPostIdByUserId(userId)
     }
 
     @OptIn(ExperimentalPagingApi::class)
@@ -161,6 +198,26 @@ class PostRepositoryImpl @Inject constructor(
             remoteMediator = PostRemoteMediator(
                 getLastPostIdFromLocalUseCase,
                 getPostsPaginatedUseCase,
+                upsertPostsUseCase
+            ),
+            pagingSourceFactory = pagingSourceFactory
+        ).flow
+    }
+
+    @OptIn(ExperimentalPagingApi::class)
+    override suspend fun getPostsByUserIdPaginatedFromLocal(
+        userId: String,
+        getLastPostIdByUserIdUseCase: GetLastPostIdByUserIdUseCase,
+        getPostsByUserIdPaginatedUseCase: GetPostsByUserIdPaginatedUseCase,
+        upsertPostsUseCase: UpsertPostsUseCase
+    ): Flow<PagingData<PostEntity>> {
+        val pagingSourceFactory = { appDatabase.postDao().getPostsByUserIdPaginated(userId) }
+        return Pager(
+            config = PagingConfig(pageSize = 20, initialLoadSize = 20),
+            remoteMediator = PostByIdRemoteMediator(
+                userId,
+                getLastPostIdByUserIdUseCase,
+                getPostsByUserIdPaginatedUseCase,
                 upsertPostsUseCase
             ),
             pagingSourceFactory = pagingSourceFactory

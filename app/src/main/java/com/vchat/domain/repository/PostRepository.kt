@@ -5,10 +5,7 @@ import androidx.paging.PagingData
 import com.vchat.common.Response
 import com.vchat.data.local.db.entity.PostEntity
 import com.vchat.data.models.Post
-import com.vchat.domain.usecase.posts.GetLastPostIdFromLocalUseCase
-import com.vchat.domain.usecase.posts.GetPostsPaginatedUseCase
-import com.vchat.domain.usecase.posts.SearchPostsFromLocalUseCase
-import com.vchat.domain.usecase.posts.UpsertPostsUseCase
+import com.vchat.domain.usecase.posts.*
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -20,12 +17,21 @@ interface PostRepository {
     suspend fun insertPost(post: Post): Response<PostEntity>
     suspend fun deletePost(postEntity: PostEntity): Response<Unit>
     suspend fun getPostFromServerPaginated(nextPage: String?): Response<List<PostEntity>>
+    suspend fun getPostsByUserIdPaginated(nextPage: String?, userId: String): Response<List<PostEntity>>
     suspend fun getLastPostId(): String?
+    suspend fun getLastPostIdByUserId(userId: String): String?
     suspend fun getPostsPaginated(
         getLastPostIdFromLocalUseCase: GetLastPostIdFromLocalUseCase,
         getPostsPaginatedUseCase: GetPostsPaginatedUseCase,
         upsertPostsUseCase: UpsertPostsUseCase,
         searchQuery: String?
+    ): Flow<PagingData<PostEntity>>
+
+    suspend fun getPostsByUserIdPaginatedFromLocal(
+        userId: String,
+        getLastPostIdByUserIdUseCase: GetLastPostIdByUserIdUseCase,
+        getPostsByUserIdPaginatedUseCase: GetPostsByUserIdPaginatedUseCase,
+        upsertPostsUseCase: UpsertPostsUseCase
     ): Flow<PagingData<PostEntity>>
 
     suspend fun upsertPosts(postEntityList: List<PostEntity>)

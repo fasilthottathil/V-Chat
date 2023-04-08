@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
@@ -62,7 +63,7 @@ class AddEditPostViewModel @Inject constructor(
 
             val post = getPostByIdUseCase.execute(postEntity.id)
 
-            if (post == null) {
+            if (post == null || post.id.isEmpty()) {
                 val user = getUserByIdFromLocalUseCase.execute(appPreferenceManager.getMyId().toString())
                 postEntity.apply {
                     id = UUID.randomUUID().toString()
@@ -98,14 +99,12 @@ class AddEditPostViewModel @Inject constructor(
                 }
             }
 
-            if (post == null) {
+            if (post == null || post.id.isEmpty()) {
                 postEntity.mapObjectTo<PostEntity, Post>()?.let {
                     when (val response = addPostUseCase.execute(it)) {
                         is Response.Success -> {
                             stopLoading()
                             _onProductAddOrUpdated.value = true
-                            delay(40)
-                            _onProductAddOrUpdated.value = false
                         }
                         is Response.Error -> {
                             stopLoading()
@@ -119,8 +118,6 @@ class AddEditPostViewModel @Inject constructor(
                         is Response.Success -> {
                             stopLoading()
                             _onProductAddOrUpdated.value = true
-                            delay(40)
-                            _onProductAddOrUpdated.value = false
                         }
                         is Response.Error -> {
                             stopLoading()

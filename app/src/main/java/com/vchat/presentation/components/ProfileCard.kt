@@ -22,13 +22,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.vchat.data.local.db.entity.UserEntity
 import com.vchat.ui.theme.Primary
 
 /**
  * Created by Fasil on 21/03/23.
  */
 @Composable
-fun ProfileCard() {
+fun ProfileCard(userEntity: UserEntity, userId: String?, onClickButton: (Boolean) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -42,7 +43,7 @@ fun ProfileCard() {
             verticalArrangement = Arrangement.Center
         ) {
             val painter =
-                rememberAsyncImagePainter("https://avatars.githubusercontent.com/u/59242329?v=4")
+                rememberAsyncImagePainter(userEntity.profileUrl)
             Image(
                 painter = painter,
                 contentDescription = null,
@@ -54,7 +55,7 @@ fun ProfileCard() {
             )
             Spacer(modifier = Modifier.height(3.dp))
             Text(
-                text = "Username",
+                text = userEntity.name,
                 color = Color.Black,
                 fontSize = 18.sp,
                 maxLines = 1,
@@ -62,7 +63,7 @@ fun ProfileCard() {
                 modifier = Modifier.padding(6.dp)
             )
             Text(
-                text = "Long description about the user and other some information about the user",
+                text = userEntity.about,
                 fontSize = 14.sp,
                 maxLines = 4,
                 overflow = TextOverflow.Ellipsis,
@@ -74,7 +75,9 @@ fun ProfileCard() {
                     .fillMaxWidth()
                     .padding(12.dp)
                     .clip(ShapeDefaults.Large)
-                    .clickable { },
+                    .clickable {
+                        onClickButton(userId == userEntity.id)
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -85,7 +88,7 @@ fun ProfileCard() {
                         .background(Primary)
                         .border(width = 1.dp, color = Color.Black, shape = ShapeDefaults.Large)
                         .padding(12.dp),
-                    text = "Edit Profile",
+                    text = if (userId == userEntity.id) "Edit Profile" else "Send Message",
                     color = Color.Black,
                     fontSize = 16.sp,
                     textAlign = TextAlign.Center
@@ -98,5 +101,11 @@ fun ProfileCard() {
 @Preview
 @Composable
 fun ProfileCardPreview() {
-    ProfileCard()
+    ProfileCard(
+        UserEntity(
+            name = "Fasil",
+            about = "Long description about the user and other some information about the user",
+            profileUrl = "https://avatars.githubusercontent.com/u/59242329?v=4"
+        ), null
+    ) {}
 }

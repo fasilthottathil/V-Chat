@@ -17,6 +17,9 @@ import com.vchat.presentation.explore.AddEditPostViewModel
 import com.vchat.presentation.explore.Explore
 import com.vchat.presentation.explore.ExploreViewModel
 import com.vchat.presentation.profile.Profile
+import com.vchat.presentation.profile.ProfileViewModel
+import com.vchat.presentation.profile.ViewProfile
+import com.vchat.presentation.profile.ViewProfileViewModel
 
 /**
  * Created by Fasil on 19/03/23.
@@ -44,11 +47,25 @@ fun MainNavGraph(navHostController: NavHostController, modifier: Modifier) {
                 searchPost = { exploreViewModel.search(it) },
                 deletePost = { exploreViewModel.deletePost(it) },
                 editPost = { navHostController.navigate(NavRoute.AddEditPost.route.replace("{postID}", it.id)) },
-                addPost = { navHostController.navigate(NavRoute.AddEditPost.route) }
+                addPost = { navHostController.navigate(NavRoute.AddEditPost.route) },
+                viewProfile = { navHostController.navigate(NavRoute.ViewProfile.route.replace("{userId}",it)) }
             )
         }
         composable(BottomNavRoute.Profile.route) {
-            Profile()
+            val profileViewModel: ProfileViewModel = hiltViewModel()
+            profileViewModel.getUser()
+            profileViewModel.getPosts()
+            Profile(
+                error = profileViewModel.error,
+                loading = profileViewModel.loading,
+                resetError = { profileViewModel.resetError() },
+                pagingItems = profileViewModel.posts.collectAsLazyPagingItems(),
+                userID = profileViewModel.userID,
+                user = profileViewModel.user.collectAsStateWithLifecycle(),
+                deletePost = { profileViewModel.deletePost(it) },
+                editPost = { navHostController.navigate(NavRoute.AddEditPost.route.replace("{postID}", it.id)) },
+                editProfile = {  }
+            )
         }
         composable(
             NavRoute.AddEditPost.route,
@@ -66,6 +83,26 @@ fun MainNavGraph(navHostController: NavHostController, modifier: Modifier) {
                     addEditPostViewModel.addOrEditPost(postEntity, uri)
                 }
             ) { navHostController.popBackStack() }
+        }
+        composable(
+            NavRoute.ViewProfile.route,
+            arguments = listOf(navArgument("userId"){ type = NavType.StringType })
+        ) { backStackEntry ->
+            val viewProfileViewModel: ViewProfileViewModel = hiltViewModel()
+            viewProfileViewModel.getUser(backStackEntry.arguments?.getString("userId"))
+            viewProfileViewModel.getPosts(backStackEntry.arguments?.getString("userId"))
+            ViewProfile(
+                error = viewProfileViewModel.error,
+                loading = viewProfileViewModel.loading,
+                resetError = { viewProfileViewModel.resetError() },
+                pagingItems = viewProfileViewModel.posts.collectAsLazyPagingItems(),
+                userID = viewProfileViewModel.userID,
+                user = viewProfileViewModel.user.collectAsStateWithLifecycle(),
+                deletePost = { viewProfileViewModel.deletePost(it) },
+                editPost = { navHostController.navigate(NavRoute.AddEditPost.route.replace("{postID}", it.id)) },
+                startChat = {  },
+                editProfile = { }
+            )
         }
     }
 }

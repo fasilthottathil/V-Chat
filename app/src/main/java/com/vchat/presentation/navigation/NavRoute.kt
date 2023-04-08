@@ -10,4 +10,5 @@ sealed class NavRoute(val route: String) {
     object Home : NavRoute("home")
     object PasswordReset : NavRoute("password_reset")
     object AddEditPost : NavRoute("add_edit_post/{postID}")
+    object ViewProfile : NavRoute("view_profile/{userId}")
 }
