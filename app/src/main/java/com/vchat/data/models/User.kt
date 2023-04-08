@@ -9,9 +9,22 @@ data class User(
     val email: String = "",
     val password: String = "",
     val gender: String = "",
-    val profileUrl: String = "",
+    var profileUrl: String = "",
     val about: String = "Hey there i'm using V Chat!",
     val createdOn: Long = System.currentTimeMillis(),
     val isTerminated: Boolean = false,
     val isPremium: Boolean = false
-)
+) {
+    fun toMap() = mapOf(
+        "id" to id,
+        "name" to name,
+        "email" to email,
+        "password" to password,
+        "gender" to gender,
+        "profileUrl" to profileUrl,
+        "about" to about,
+        "createdOn" to createdOn,
+        "isTerminated" to isTerminated,
+        "isPremium" to isPremium
+    )
+}

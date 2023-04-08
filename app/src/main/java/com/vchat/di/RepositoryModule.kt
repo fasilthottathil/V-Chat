@@ -25,9 +25,10 @@ object RepositoryModule {
     fun provideUserRepository(
         firebaseAuth: FirebaseAuth,
         firebaseFirestore: FirebaseFirestore,
+        firebaseStorage: FirebaseStorage,
         appDatabase: AppDatabase,
         resources: Resources
-    ): UserRepositoryImpl = UserRepositoryImpl(firebaseAuth, firebaseFirestore, appDatabase, resources)
+    ): UserRepositoryImpl = UserRepositoryImpl(firebaseAuth, firebaseFirestore, firebaseStorage, appDatabase, resources)
 
     @Provides
     fun provideChatsRepository(

@@ -10,11 +10,11 @@ import androidx.room.PrimaryKey
 data class UserEntity(
     @PrimaryKey(autoGenerate = false)
     val id: String = "",
-    val name: String = "",
+    var name: String = "",
     val email: String = "",
     val gender: String = "",
     val profileUrl: String = "",
-    val about: String = "",
+    var about: String = "",
     val createdOn: Long = System.currentTimeMillis(),
     val isTerminated: Boolean = false,
     val isPremium: Boolean = false

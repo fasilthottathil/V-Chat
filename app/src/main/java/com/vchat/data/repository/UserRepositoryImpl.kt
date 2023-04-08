@@ -1,8 +1,10 @@
 package com.vchat.data.repository
 
 import android.content.res.Resources
+import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.vchat.R
 import com.vchat.common.Constants
 import com.vchat.common.Response
@@ -11,8 +13,12 @@ import com.vchat.data.local.db.entity.UserEntity
 import com.vchat.data.models.User
 import com.vchat.domain.repository.UserRepository
 import com.vchat.utils.mapObjectTo
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import okhttp3.internal.wait
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -22,6 +28,7 @@ import javax.inject.Inject
 class UserRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val firebaseFirestore: FirebaseFirestore,
+    private val firebaseStorage: FirebaseStorage,
     private val appDatabase: AppDatabase,
     private val resources: Resources
 ) : UserRepository {
@@ -119,5 +126,60 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun getUserByIdFromLocal(id: String): UserEntity? {
         return appDatabase.userDao().getUserById(id)
+    }
+
+    override suspend fun updateUser(user: User): Response<UserEntity> {
+        kotlin.runCatching {
+            return@runCatching firebaseFirestore.collection(Constants.USERS)
+                .whereEqualTo("id", user.id)
+                .limit(1)
+                .get()
+                .await()
+        }.onSuccess {
+            if (!it.isEmpty) {
+                kotlin.runCatching {
+                    return@runCatching firebaseFirestore.collection(Constants.USERS)
+                        .document(it.documents[0].id)
+                        .update(user.toMap())
+                        .await()
+                }.onSuccess {
+                    user.mapObjectTo<User, UserEntity>()?.let { userEntity ->
+                        CoroutineScope(Dispatchers.IO).launch {
+                            appDatabase.userDao().upsertUser(userEntity)
+                        }
+                        return Response.Success(userEntity)
+                    }
+                }.onFailure { throwable ->
+                    Timber.e(throwable)
+                    return Response.Error(throwable.message.toString())
+                }
+            } else {
+                return Response.Error(resources.getString(R.string.user_not_found))
+            }
+        }.onFailure {
+            Timber.e(it)
+            return Response.Error(it.message.toString())
+        }
+        return Response.Error(resources.getString(R.string.something_went_wrong))
+    }
+
+    override suspend fun uploadUserImage(profileUri: Uri, userId: String): Response<String> {
+        val storageRef = firebaseStorage.reference.child(Constants.USERS + "/$userId")
+        kotlin.runCatching {
+            return@runCatching storageRef.putFile(profileUri).await()
+        }.onSuccess {
+            kotlin.runCatching {
+                return@runCatching storageRef.downloadUrl.await()
+            }.onSuccess {
+                return Response.Success(it.toString())
+            }.onFailure { throwable ->
+                Timber.e(throwable)
+                return Response.Error(throwable.message.toString())
+            }
+        }.onFailure {
+            Timber.e(it)
+            return Response.Error(it.message.toString())
+        }
+        return Response.Error(resources.getString(R.string.something_went_wrong))
     }
 }

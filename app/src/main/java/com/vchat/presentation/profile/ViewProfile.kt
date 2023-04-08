@@ -47,6 +47,7 @@ fun ViewProfile(
     editPost: (PostEntity) -> Unit,
     startChat: (UserEntity) -> Unit,
     editProfile: (UserEntity) -> Unit,
+    onClickBack: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -60,7 +61,7 @@ fun ViewProfile(
                 contentDescription = null,
                 modifier = Modifier
                     .clip(CircleShape)
-                    .clickable { }
+                    .clickable { onClickBack.invoke() }
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(text = "Profile", fontSize = 16.sp, color = Color.Black)
@@ -160,6 +161,6 @@ fun ViewProfilePreview() {
         pagingItems = pagingItems.collectAsLazyPagingItems(),
         userID = "",
         user = user,
-        {}, {}, {}, {}
+        {}, {}, {}, {}, {}
     )
 }

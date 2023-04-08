@@ -1,5 +1,6 @@
 package com.vchat.domain.repository
 
+import android.net.Uri
 import com.google.firebase.auth.AuthCredential
 import com.vchat.common.Response
 import com.vchat.data.local.db.entity.UserEntity
@@ -17,4 +18,6 @@ interface UserRepository {
     suspend fun getUserFromServer(email: String): Response<UserEntity>
     suspend fun getUserFromLocal(id: String): Flow<UserEntity?>
     suspend fun getUserByIdFromLocal(id: String): UserEntity?
+    suspend fun updateUser(user: User): Response<UserEntity>
+    suspend fun uploadUserImage(profileUri: Uri, userId: String): Response<String>
 }

@@ -16,10 +16,7 @@ import com.vchat.presentation.explore.AddEditPost
 import com.vchat.presentation.explore.AddEditPostViewModel
 import com.vchat.presentation.explore.Explore
 import com.vchat.presentation.explore.ExploreViewModel
-import com.vchat.presentation.profile.Profile
-import com.vchat.presentation.profile.ProfileViewModel
-import com.vchat.presentation.profile.ViewProfile
-import com.vchat.presentation.profile.ViewProfileViewModel
+import com.vchat.presentation.profile.*
 
 /**
  * Created by Fasil on 19/03/23.
@@ -46,9 +43,23 @@ fun MainNavGraph(navHostController: NavHostController, modifier: Modifier) {
                 userID = exploreViewModel.userID,
                 searchPost = { exploreViewModel.search(it) },
                 deletePost = { exploreViewModel.deletePost(it) },
-                editPost = { navHostController.navigate(NavRoute.AddEditPost.route.replace("{postID}", it.id)) },
+                editPost = {
+                    navHostController.navigate(
+                        NavRoute.AddEditPost.route.replace(
+                            "{postID}",
+                            it.id
+                        )
+                    )
+                },
                 addPost = { navHostController.navigate(NavRoute.AddEditPost.route) },
-                viewProfile = { navHostController.navigate(NavRoute.ViewProfile.route.replace("{userId}",it)) }
+                viewProfile = {
+                    navHostController.navigate(
+                        NavRoute.ViewProfile.route.replace(
+                            "{userId}",
+                            it
+                        )
+                    )
+                }
             )
         }
         composable(BottomNavRoute.Profile.route) {
@@ -63,8 +74,15 @@ fun MainNavGraph(navHostController: NavHostController, modifier: Modifier) {
                 userID = profileViewModel.userID,
                 user = profileViewModel.user.collectAsStateWithLifecycle(),
                 deletePost = { profileViewModel.deletePost(it) },
-                editPost = { navHostController.navigate(NavRoute.AddEditPost.route.replace("{postID}", it.id)) },
-                editProfile = {  }
+                editPost = {
+                    navHostController.navigate(
+                        NavRoute.AddEditPost.route.replace(
+                            "{postID}",
+                            it.id
+                        )
+                    )
+                },
+                editProfile = { navHostController.navigate(NavRoute.EditProfile.route) }
             )
         }
         composable(
@@ -86,7 +104,7 @@ fun MainNavGraph(navHostController: NavHostController, modifier: Modifier) {
         }
         composable(
             NavRoute.ViewProfile.route,
-            arguments = listOf(navArgument("userId"){ type = NavType.StringType })
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
         ) { backStackEntry ->
             val viewProfileViewModel: ViewProfileViewModel = hiltViewModel()
             viewProfileViewModel.getUser(backStackEntry.arguments?.getString("userId"))
@@ -99,10 +117,36 @@ fun MainNavGraph(navHostController: NavHostController, modifier: Modifier) {
                 userID = viewProfileViewModel.userID,
                 user = viewProfileViewModel.user.collectAsStateWithLifecycle(),
                 deletePost = { viewProfileViewModel.deletePost(it) },
-                editPost = { navHostController.navigate(NavRoute.AddEditPost.route.replace("{postID}", it.id)) },
-                startChat = {  },
-                editProfile = { }
-            )
+                editPost = {
+                    navHostController.navigate(
+                        NavRoute.AddEditPost.route.replace(
+                            "{postID}",
+                            it.id
+                        )
+                    )
+                },
+                startChat = { },
+                editProfile = { navHostController.navigate(NavRoute.EditProfile.route) }
+            ) { navHostController.popBackStack() }
+        }
+        composable(NavRoute.EditProfile.route) {
+            val editProfileViewModel: EditProfileViewModel = hiltViewModel()
+            editProfileViewModel.getUser()
+            EditProfile(
+                error = editProfileViewModel.error,
+                loading = editProfileViewModel.loading,
+                resetError = { editProfileViewModel.resetError() },
+                user = editProfileViewModel.user.collectAsStateWithLifecycle(),
+                onUpdateUser = editProfileViewModel.onUpdateUser,
+                onClickDone = { userEntity, uri ->
+                    editProfileViewModel.updateUser(
+                        userEntity,
+                        uri
+                    )
+                }
+            ) {
+                navHostController.popBackStack()
+            }
         }
     }
 }

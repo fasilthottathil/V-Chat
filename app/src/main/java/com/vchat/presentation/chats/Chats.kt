@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -50,14 +51,15 @@ fun Chats(modifier: Modifier, user: State<UserEntity?>, chats: State<List<ChatEn
             Box(
                 modifier = Modifier
                     .size(50.dp)
-                    .clip(ShapeDefaults.Small)
+                    .clip(ShapeDefaults.Medium)
                     .background(Color.White)
             ) {
                 val painter = rememberAsyncImagePainter(user.value?.profileUrl)
                 Image(
                     painter = painter,
                     contentDescription = null,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.FillBounds
                 )
             }
             Box(
