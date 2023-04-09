@@ -23,6 +23,12 @@ class AppPreferenceManager @Inject constructor(application: Application) {
 
     fun getMyId() = sharedPreferences.getString(USER_ID, null)
 
+    fun logout() = sharedPreferences.edit {
+        putString(USER_ID, null)
+        putBoolean(IS_LOGIN, false)
+        apply()
+    }
+
     companion object {
         private const val PREF = "MY_PREF"
         private const val IS_LOGIN = "IS_LOGIN"

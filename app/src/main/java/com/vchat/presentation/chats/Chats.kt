@@ -35,7 +35,12 @@ import com.vchat.ui.theme.Primary
  * Created by Fasil on 19/03/23.
  */
 @Composable
-fun Chats(modifier: Modifier, user: State<UserEntity?>, chats: State<List<ChatEntity>?>) {
+fun Chats(
+    modifier: Modifier,
+    user: State<UserEntity?>,
+    chats: State<List<ChatEntity>?>,
+    onClickSettings: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -82,7 +87,7 @@ fun Chats(modifier: Modifier, user: State<UserEntity?>, chats: State<List<ChatEn
                 contentDescription = null,
                 modifier = Modifier
                     .clip(CircleShape)
-                    .clickable { }
+                    .clickable { onClickSettings.invoke() }
             )
         }
         LazyColumn(modifier = modifier.padding(start = 4.dp, end = 4.dp)) {
@@ -107,5 +112,5 @@ fun ChatsPreview() {
     val chats = remember {
         mutableStateOf(emptyList<ChatEntity>())
     }
-    Chats(modifier = Modifier, user = userState, chats = chats)
+    Chats(modifier = Modifier, user = userState, chats = chats) {}
 }

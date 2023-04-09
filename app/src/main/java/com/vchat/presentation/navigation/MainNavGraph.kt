@@ -1,7 +1,9 @@
 package com.vchat.presentation.navigation
 
+import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -10,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.vchat.MainActivity
 import com.vchat.presentation.chats.Chats
 import com.vchat.presentation.chats.ChatsViewModel
 import com.vchat.presentation.explore.AddEditPost
@@ -17,6 +20,8 @@ import com.vchat.presentation.explore.AddEditPostViewModel
 import com.vchat.presentation.explore.Explore
 import com.vchat.presentation.explore.ExploreViewModel
 import com.vchat.presentation.profile.*
+import com.vchat.presentation.settings.Settings
+import com.vchat.presentation.settings.SettingsViewModel
 
 /**
  * Created by Fasil on 19/03/23.
@@ -30,7 +35,9 @@ fun MainNavGraph(navHostController: NavHostController, modifier: Modifier) {
                 modifier,
                 viewModel.user.collectAsStateWithLifecycle(),
                 viewModel.chats.collectAsStateWithLifecycle()
-            )
+            ) {
+                navHostController.navigate(NavRoute.Settings.route)
+            }
         }
         composable(BottomNavRoute.Explore.route) {
             val exploreViewModel: ExploreViewModel = hiltViewModel()
@@ -142,6 +149,30 @@ fun MainNavGraph(navHostController: NavHostController, modifier: Modifier) {
                     editProfileViewModel.updateUser(
                         userEntity,
                         uri
+                    )
+                }
+            ) {
+                navHostController.popBackStack()
+            }
+        }
+        composable(NavRoute.Settings.route) {
+            val settingsViewModel: SettingsViewModel = hiltViewModel()
+            Settings(
+                error = settingsViewModel.error,
+                loading = settingsViewModel.loading,
+                onDeleteAccount = settingsViewModel.onDeleteAccount,
+                onLogout = settingsViewModel.onLogout,
+                resetError = { settingsViewModel.resetError() },
+                editProfile = { navHostController.navigate(NavRoute.EditProfile.route) },
+                deleteAccount = { settingsViewModel.deleteAccount() },
+                logout = { settingsViewModel.logout() },
+                restartApp = {
+                    it.startActivity(
+                        Intent(it, MainActivity::class.java).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        }
                     )
                 }
             ) {

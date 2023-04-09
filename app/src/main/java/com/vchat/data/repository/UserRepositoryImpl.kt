@@ -18,7 +18,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import okhttp3.internal.wait
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -39,7 +38,7 @@ class UserRepositoryImpl @Inject constructor(
             return if (it.user == null) {
                 Response.Error(resources.getString(R.string.invalid_username_or_pass))
             } else {
-                when(val response = getUserFromServer(email)) {
+                when (val response = getUserFromServer(email)) {
                     is Response.Success -> Response.Success(response.data)
                     is Response.Error -> Response.Error(response.message)
                 }
@@ -63,10 +62,13 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun register(user: User): Response<UserEntity> {
         kotlin.runCatching {
-            return@runCatching firebaseAuth.createUserWithEmailAndPassword(user.email, user.password).await()
+            return@runCatching firebaseAuth.createUserWithEmailAndPassword(
+                user.email,
+                user.password
+            ).await()
         }.onSuccess {
             if (it.user != null) {
-                return when(val response = createUser(user)) {
+                return when (val response = createUser(user)) {
                     is Response.Success -> {
                         Response.Success(response.data)
                     }
@@ -175,6 +177,104 @@ class UserRepositoryImpl @Inject constructor(
             }.onFailure { throwable ->
                 Timber.e(throwable)
                 return Response.Error(throwable.message.toString())
+            }
+        }.onFailure {
+            Timber.e(it)
+            return Response.Error(it.message.toString())
+        }
+        return Response.Error(resources.getString(R.string.something_went_wrong))
+    }
+
+    override suspend fun deleteAccount(userId: String): Response<Unit> {
+        kotlin.runCatching {
+            return@runCatching firebaseFirestore.collection(Constants.POSTS)
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+        }.onSuccess {
+            if (it.isEmpty) {
+                kotlin.runCatching {
+                    return@runCatching firebaseFirestore.collection(Constants.USERS)
+                        .whereEqualTo("id", userId)
+                        .limit(1)
+                        .get()
+                        .await()
+                }.onSuccess { snapshot ->
+                    if (snapshot.isEmpty) {
+                        return Response.Error(resources.getString(R.string.user_not_found))
+                    } else {
+                        kotlin.runCatching {
+                            return@runCatching firebaseFirestore.collection(Constants.USERS)
+                                .document(snapshot.documents[0].id)
+                                .delete()
+                                .await()
+                        }.onSuccess {
+                            return try {
+                                firebaseAuth.currentUser?.delete()?.await()
+                                Response.Success(Unit)
+                            } catch (e: Exception) {
+                                Response.Error(e.message.orEmpty())
+                            }
+                        }.onFailure { throwable ->
+                            Timber.e(throwable)
+                            return Response.Error(throwable.message.toString())
+                        }
+                    }
+                }.onFailure { throwable ->
+                    Timber.e(throwable)
+                    return Response.Error(throwable.message.toString())
+                }
+            } else {
+                kotlin.runCatching {
+                    for (i in 0 until  it.documents.size - 1) {
+                        try {
+                            firebaseFirestore.collection(Constants.POSTS)
+                                .document(it.documents[i].id)
+                                .delete()
+                                .await()
+                        } catch (ignored: Exception) {
+                        }
+                    }
+                    return@runCatching firebaseFirestore.collection(Constants.POSTS)
+                        .document(it.documents[it.documents.size - 1].id)
+                        .delete()
+                        .await()
+                }.onSuccess {
+                    kotlin.runCatching {
+                        return@runCatching firebaseFirestore.collection(Constants.USERS)
+                            .whereEqualTo("id", userId)
+                            .limit(1)
+                            .get()
+                            .await()
+                    }.onSuccess { snapshot ->
+                        if (snapshot.isEmpty) {
+                            return Response.Error(resources.getString(R.string.user_not_found))
+                        } else {
+                            kotlin.runCatching {
+                                return@runCatching firebaseFirestore.collection(Constants.USERS)
+                                    .document(snapshot.documents[0].id)
+                                    .delete()
+                                    .await()
+                            }.onSuccess {
+                                return try {
+                                    firebaseAuth.currentUser?.delete()?.await()
+                                    Response.Success(Unit)
+                                } catch (e: Exception) {
+                                    Response.Error(e.message.orEmpty())
+                                }
+                            }.onFailure { throwable ->
+                                Timber.e(throwable)
+                                return Response.Error(throwable.message.toString())
+                            }
+                        }
+                    }.onFailure { throwable ->
+                        Timber.e(throwable)
+                        return Response.Error(throwable.message.toString())
+                    }
+                }.onFailure { throwable ->
+                    Timber.e(throwable)
+                    return Response.Error(throwable.message.toString())
+                }
             }
         }.onFailure {
             Timber.e(it)

@@ -23,4 +23,7 @@ interface ChatsDao {
     @Query("SELECT * FROM Chats WHERE email =:email")
     fun getChatByEmail(email: String): ChatEntity?
 
+    @Query("DELETE FROM Chats")
+    fun deleteAll()
+
 }

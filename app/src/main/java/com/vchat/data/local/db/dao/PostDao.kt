@@ -46,4 +46,7 @@ interface PostDao {
     @Query("SELECT * FROM posts WHERE id = :postId")
     fun getPostById(postId: String): PostEntity?
 
+    @Query("DELETE FROM posts")
+    fun deleteAll()
+
 }
