@@ -118,6 +118,14 @@ fun requestPermissions(context: ComponentActivity) {
     context.requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), Constants.READ_EXTERNAL_STORAGE_REQUEST)
 }
 
+inline fun <reified T> T.toJson(): String {
+    return try {
+        Gson().toJson(this)
+    } catch (ignored: Exception) {
+        ""
+    }
+}
+
 
 
 

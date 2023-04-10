@@ -11,10 +11,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -26,10 +23,12 @@ import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.vchat.common.enums.PostDialogOption
+import com.vchat.data.local.db.entity.ChatEntity
 import com.vchat.data.local.db.entity.PostEntity
 import com.vchat.data.local.db.entity.UserEntity
 import com.vchat.presentation.components.*
 import com.vchat.ui.theme.Primary
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 
 /**
@@ -43,10 +42,12 @@ fun ViewProfile(
     pagingItems: LazyPagingItems<PostEntity>,
     userID: String?,
     user: State<UserEntity>,
+    onStartChat: State<ChatEntity?>,
     deletePost: (PostEntity) -> Unit,
     editPost: (PostEntity) -> Unit,
     startChat: (UserEntity) -> Unit,
     editProfile: (UserEntity) -> Unit,
+    navigateToChat: (ChatEntity) -> Unit,
     onClickBack: () -> Unit
 ) {
     Column(
@@ -87,6 +88,13 @@ fun ViewProfile(
 
         val post = remember {
             mutableStateOf(PostEntity())
+        }
+
+        LaunchedEffect(onStartChat.value) {
+            onStartChat.value?.let {
+                delay(40)
+                navigateToChat(it)
+            }
         }
 
         LazyColumn(
@@ -154,6 +162,9 @@ fun ViewProfilePreview() {
     val user = remember {
         mutableStateOf(UserEntity())
     }
+    val onStartChat = remember {
+        mutableStateOf(ChatEntity())
+    }
     ViewProfile(
         error,
         loading,
@@ -161,6 +172,7 @@ fun ViewProfilePreview() {
         pagingItems = pagingItems.collectAsLazyPagingItems(),
         userID = "",
         user = user,
-        {}, {}, {}, {}, {}
+        onStartChat = onStartChat,
+        {}, {}, {}, {}, {}, {}
     )
 }

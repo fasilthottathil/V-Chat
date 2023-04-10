@@ -38,9 +38,10 @@ class ChatsRepositoryImpl @Inject constructor(
                     value?.toObjects(Chat::class.java)?.let {
                         val chatEntityList = mutableListOf<ChatEntity>()
 
-                        it.filterNotNull().mapObjectTo<List<Chat>, List<ChatEntity>>()?.let { chatEntities ->
-                            chatEntityList.addAll(chatEntities)
-                        }
+                        it.filterNotNull().mapObjectTo<List<Chat>, List<ChatEntity>>()
+                            ?.let { chatEntities ->
+                                chatEntityList.addAll(chatEntities)
+                            }
                         CoroutineScope(Dispatchers.IO).launch {
                             appDatabase.chatsDao().upsertChats(chatEntityList)
                         }
@@ -69,7 +70,13 @@ class ChatsRepositoryImpl @Inject constructor(
                 return@runCatching firebaseFirestore.collection(Constants.CHATS)
                     .document(friendId)
                     .collection(Constants.CHATS)
-                    .add(chat.copy(email = myData.email, name = myData.name, profileUrl = myData.profileUrl))
+                    .add(
+                        chat.copy(
+                            email = myData.email,
+                            name = myData.name,
+                            profileUrl = myData.profileUrl
+                        )
+                    )
                     .await()
             }.onSuccess {
                 chat.mapObjectTo<Chat, ChatEntity>()?.let {
@@ -91,5 +98,98 @@ class ChatsRepositoryImpl @Inject constructor(
 
     override suspend fun getChatsFromLocal(): Flow<List<ChatEntity>> {
         return appDatabase.chatsDao().getChats()
+    }
+
+    override suspend fun incrementCountAndUpdateMessage(userId: String, roomId: String, message: String) {
+        kotlin.runCatching {
+            return@runCatching firebaseFirestore.collection(Constants.CHATS)
+                .document(userId)
+                .collection(Constants.CHATS)
+                .whereEqualTo("roomId", roomId)
+                .limit(1)
+                .get()
+                .await()
+        }.onSuccess {
+            if (it.isEmpty) {
+                Timber.d(resources.getString(R.string.chat_not_found))
+            } else {
+                it.documents[0].toObject(Chat::class.java)?.let { chat ->
+                    kotlin.runCatching {
+                        return@runCatching firebaseFirestore.collection(Constants.CHATS)
+                            .document(userId)
+                            .collection(Constants.CHATS)
+                            .document(it.documents[0].id)
+                            .update(chat.copy(messageCount = chat.messageCount + 1, message = message).toMap())
+                            .await()
+                    }.onFailure { throwable ->
+                        Timber.e(throwable)
+                    }
+                }
+            }
+        }.onFailure {
+            Timber.e(it)
+        }
+    }
+
+    override suspend fun clearMessageCount(userId: String, roomId: String) {
+        kotlin.runCatching {
+            return@runCatching firebaseFirestore.collection(Constants.CHATS)
+                .document(userId)
+                .collection(Constants.CHATS)
+                .whereEqualTo("roomId", roomId)
+                .limit(1)
+                .get()
+                .await()
+        }.onSuccess {
+            if (it.isEmpty) {
+                Timber.d(resources.getString(R.string.chat_not_found))
+            } else {
+                it.documents[0].toObject(Chat::class.java)?.let { chat ->
+                    kotlin.runCatching {
+                        return@runCatching firebaseFirestore.collection(Constants.CHATS)
+                            .document(userId)
+                            .collection(Constants.CHATS)
+                            .document(it.documents[0].id)
+                            .update(chat.copy(messageCount = 0).toMap())
+                            .await()
+                    }.onFailure { throwable ->
+                        Timber.e(throwable)
+                    }
+                }
+            }
+        }.onFailure {
+            Timber.e(it)
+        }
+    }
+
+    override suspend fun addMessageToChat(userId: String, roomId: String, message: String) {
+        kotlin.runCatching {
+            return@runCatching firebaseFirestore.collection(Constants.CHATS)
+                .document(userId)
+                .collection(Constants.CHATS)
+                .whereEqualTo("roomId", roomId)
+                .limit(1)
+                .get()
+                .await()
+        }.onSuccess {
+            if (it.isEmpty) {
+                Timber.d(resources.getString(R.string.chat_not_found))
+            } else {
+                it.documents[0].toObject(Chat::class.java)?.let { chat ->
+                    kotlin.runCatching {
+                        return@runCatching firebaseFirestore.collection(Constants.CHATS)
+                            .document(userId)
+                            .collection(Constants.CHATS)
+                            .document(it.documents[0].id)
+                            .update(chat.copy(message = message).toMap())
+                            .await()
+                    }.onFailure { throwable ->
+                        Timber.e(throwable)
+                    }
+                }
+            }
+        }.onFailure {
+            Timber.e(it)
+        }
     }
 }

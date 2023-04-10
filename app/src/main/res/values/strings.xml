@@ -4,4 +4,6 @@
     <string name="invalid_username_or_pass">Invalid username or password</string>
     <string name="post_not_found">Post not found on server database</string>
     <string name="user_not_found">User not found on remote database</string>
+    <string name="message_not_found">Message not found on the server databse.</string>
+    <string name="chat_not_found">Chat not found on remote database</string>
 </resources>

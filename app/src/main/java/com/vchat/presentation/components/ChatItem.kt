@@ -34,7 +34,7 @@ fun ChatItem(chatEntity: ChatEntity, onClick: (ChatEntity) -> Unit) {
     Box(modifier = Modifier
         .fillMaxWidth()
         .clip(Shapes.medium)
-        .clickable { }) {
+        .clickable { onClick.invoke(chatEntity) }) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()

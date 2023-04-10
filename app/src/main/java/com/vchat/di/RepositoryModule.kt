@@ -6,6 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.vchat.data.local.db.AppDatabase
 import com.vchat.data.local.pref.AppPreferenceManager
+import com.vchat.data.repository.ChatRepositoryImpl
 import com.vchat.data.repository.ChatsRepositoryImpl
 import com.vchat.data.repository.PostRepositoryImpl
 import com.vchat.data.repository.UserRepositoryImpl
@@ -39,11 +40,19 @@ object RepositoryModule {
     ): ChatsRepositoryImpl = ChatsRepositoryImpl(appPreferenceManager, appDatabase, firebaseFirestore, resources)
 
     @Provides
-    fun providePotRepository(
+    fun providePostRepository(
         firebaseFirestore: FirebaseFirestore,
         firebaseStorage: FirebaseStorage,
         appDatabase: AppDatabase,
         resources: Resources
     ): PostRepositoryImpl = PostRepositoryImpl(firebaseFirestore, firebaseStorage, appDatabase, resources)
+
+    @Provides
+    fun provideChatRepository(
+        firebaseFirestore: FirebaseFirestore,
+        firebaseStorage: FirebaseStorage,
+        appDatabase: AppDatabase,
+        resources: Resources
+    ): ChatRepositoryImpl = ChatRepositoryImpl(appDatabase, firebaseFirestore, firebaseStorage, resources)
 
 }

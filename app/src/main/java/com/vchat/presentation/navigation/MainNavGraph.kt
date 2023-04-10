@@ -13,6 +13,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.vchat.MainActivity
+import com.vchat.data.local.db.entity.ChatEntity
+import com.vchat.presentation.chat.Chat
+import com.vchat.presentation.chat.ChatViewModel
 import com.vchat.presentation.chats.Chats
 import com.vchat.presentation.chats.ChatsViewModel
 import com.vchat.presentation.explore.AddEditPost
@@ -22,6 +25,8 @@ import com.vchat.presentation.explore.ExploreViewModel
 import com.vchat.presentation.profile.*
 import com.vchat.presentation.settings.Settings
 import com.vchat.presentation.settings.SettingsViewModel
+import com.vchat.utils.mapObjectTo
+import com.vchat.utils.toJson
 
 /**
  * Created by Fasil on 19/03/23.
@@ -34,10 +39,13 @@ fun MainNavGraph(navHostController: NavHostController, modifier: Modifier) {
             Chats(
                 modifier,
                 viewModel.user.collectAsStateWithLifecycle(),
-                viewModel.chats.collectAsStateWithLifecycle()
-            ) {
-                navHostController.navigate(NavRoute.Settings.route)
-            }
+                viewModel.chats.collectAsStateWithLifecycle(),
+                onClickChatItem = {
+                    navHostController.currentBackStackEntry?.savedStateHandle?.set("chatEntity", it)
+                    navHostController.navigate(NavRoute.Chat.route)
+                },
+                onClickSettings = { navHostController.navigate(NavRoute.Settings.route) }
+            )
         }
         composable(BottomNavRoute.Explore.route) {
             val exploreViewModel: ExploreViewModel = hiltViewModel()
@@ -123,6 +131,7 @@ fun MainNavGraph(navHostController: NavHostController, modifier: Modifier) {
                 pagingItems = viewProfileViewModel.posts.collectAsLazyPagingItems(),
                 userID = viewProfileViewModel.userID,
                 user = viewProfileViewModel.user.collectAsStateWithLifecycle(),
+                onStartChat = viewProfileViewModel.onStartChat,
                 deletePost = { viewProfileViewModel.deletePost(it) },
                 editPost = {
                     navHostController.navigate(
@@ -132,8 +141,13 @@ fun MainNavGraph(navHostController: NavHostController, modifier: Modifier) {
                         )
                     )
                 },
-                startChat = { },
-                editProfile = { navHostController.navigate(NavRoute.EditProfile.route) }
+                startChat = { viewProfileViewModel.startChat(it) },
+                editProfile = { navHostController.navigate(NavRoute.EditProfile.route) },
+                navigateToChat = {
+                    navHostController.currentBackStackEntry?.savedStateHandle?.set("chatEntity", it)
+                    navHostController.navigate(NavRoute.Chat.route)
+                    viewProfileViewModel.resetOnChat()
+                }
             ) { navHostController.popBackStack() }
         }
         composable(NavRoute.EditProfile.route) {
@@ -175,6 +189,27 @@ fun MainNavGraph(navHostController: NavHostController, modifier: Modifier) {
                         }
                     )
                 }
+            ) {
+                navHostController.popBackStack()
+            }
+        }
+        composable(
+            NavRoute.Chat.route,
+        ) {
+            val chatEntity = navHostController.previousBackStackEntry?.savedStateHandle?.get<ChatEntity>("chatEntity")
+            val chatViewModel: ChatViewModel = hiltViewModel()
+            chatViewModel.roomId = chatEntity?.roomId
+            chatViewModel.getMessages()
+            Chat(
+                error = chatViewModel.error,
+                loading = chatViewModel.loading,
+                chatEntity = chatEntity,
+                userId = chatViewModel.userId.orEmpty(),
+                onSendMessage = chatViewModel.onSendMessage,
+                messages = chatViewModel.messages.collectAsStateWithLifecycle(),
+                resetError = { chatViewModel.resetError() },
+                sendTextMessage = { message -> chatViewModel.sendMessage(message, null) },
+                sendImageMessage = { uri -> chatViewModel.sendMessage(null, uri) }
             ) {
                 navHostController.popBackStack()
             }

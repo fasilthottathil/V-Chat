@@ -12,4 +12,7 @@ interface ChatsRepository {
     suspend fun getChatsFromServer()
     suspend fun startChat(chat: Chat, friendId: String): Response<ChatEntity>
     suspend fun getChatsFromLocal(): Flow<List<ChatEntity>>
+    suspend fun incrementCountAndUpdateMessage(userId: String, roomId: String, message: String)
+    suspend fun clearMessageCount(userId: String, roomId: String)
+    suspend fun addMessageToChat(userId: String, roomId: String, message: String)
 }

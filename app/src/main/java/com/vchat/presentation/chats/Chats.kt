@@ -39,7 +39,8 @@ fun Chats(
     modifier: Modifier,
     user: State<UserEntity?>,
     chats: State<List<ChatEntity>?>,
-    onClickSettings: () -> Unit
+    onClickSettings: () -> Unit,
+    onClickChatItem: (ChatEntity) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -94,8 +95,8 @@ fun Chats(
             chats.value?.let {
                 items(it) { chatEntity ->
                     Spacer(modifier = Modifier.height(12.dp))
-                    ChatItem(chatEntity) {
-
+                    ChatItem(chatEntity) { entity ->
+                        onClickChatItem.invoke(entity)
                     }
                 }
             }
@@ -112,5 +113,5 @@ fun ChatsPreview() {
     val chats = remember {
         mutableStateOf(emptyList<ChatEntity>())
     }
-    Chats(modifier = Modifier, user = userState, chats = chats) {}
+    Chats(modifier = Modifier, user = userState, chats = chats, {}) {}
 }

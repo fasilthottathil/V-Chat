@@ -107,7 +107,34 @@ class UserRepositoryImpl @Inject constructor(
                 .get()
                 .await()
         }.onSuccess {
-            it?.let {
+            if (it.isEmpty) {
+                return Response.Error(resources.getString(R.string.user_not_found))
+            } else {
+                it.documents[0].toObject(User::class.java)?.also { user ->
+                    user.mapObjectTo<User, UserEntity>()?.let { userEntity ->
+                        appDatabase.userDao().upsertUser(userEntity)
+                        return Response.Success(userEntity)
+                    }
+                }
+            }
+        }.onFailure {
+            Timber.e(it)
+            return Response.Error(it.message.toString())
+        }
+        return Response.Error(resources.getString(R.string.something_went_wrong))
+    }
+
+    override suspend fun getUserFromServerByUserId(userId: String): Response<UserEntity> {
+        kotlin.runCatching {
+            return@runCatching firebaseFirestore.collection(Constants.USERS)
+                .whereEqualTo("id", userId)
+                .limit(1)
+                .get()
+                .await()
+        }.onSuccess {
+            if (it.isEmpty) {
+                return Response.Error(resources.getString(R.string.user_not_found))
+            } else {
                 it.documents[0].toObject(User::class.java)?.also { user ->
                     user.mapObjectTo<User, UserEntity>()?.let { userEntity ->
                         appDatabase.userDao().upsertUser(userEntity)
