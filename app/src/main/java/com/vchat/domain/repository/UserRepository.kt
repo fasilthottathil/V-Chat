@@ -1,7 +1,6 @@
 package com.vchat.domain.repository
 
 import android.net.Uri
-import com.google.firebase.auth.AuthCredential
 import com.vchat.common.Response
 import com.vchat.data.local.db.entity.UserEntity
 import com.vchat.data.models.User

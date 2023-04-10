@@ -19,7 +19,6 @@ import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.vchat.common.enums.PostDialogOption
-import com.vchat.common.enums.PostType
 import com.vchat.data.local.db.entity.PostEntity
 import com.vchat.data.local.db.entity.UserEntity
 import com.vchat.presentation.components.*

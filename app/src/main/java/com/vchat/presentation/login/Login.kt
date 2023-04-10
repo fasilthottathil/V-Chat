@@ -2,9 +2,12 @@ package com.vchat.presentation.login
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.material.Text
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
@@ -18,7 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vchat.R
 import com.vchat.common.enums.InputType
-import com.vchat.presentation.components.*
+import com.vchat.presentation.components.ArrowButton
+import com.vchat.presentation.components.InputBox
+import com.vchat.presentation.components.LoadingDialog
+import com.vchat.presentation.components.MessageDialog
 import com.vchat.ui.theme.Primary
 
 /**

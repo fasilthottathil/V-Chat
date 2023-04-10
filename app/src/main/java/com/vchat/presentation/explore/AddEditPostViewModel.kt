@@ -19,13 +19,10 @@ import com.vchat.domain.usecase.user.GetUserByIdFromLocalUseCase
 import com.vchat.utils.mapObjectTo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.UUID
+import java.util.*
 import javax.inject.Inject
 
 /**

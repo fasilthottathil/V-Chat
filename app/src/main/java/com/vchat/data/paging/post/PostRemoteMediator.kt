@@ -8,7 +8,6 @@ import com.vchat.common.Response
 import com.vchat.data.local.db.entity.PostEntity
 import com.vchat.domain.usecase.posts.GetLastPostIdFromLocalUseCase
 import com.vchat.domain.usecase.posts.GetPostsPaginatedUseCase
-import com.vchat.domain.usecase.posts.SearchPostsFromLocalUseCase
 import com.vchat.domain.usecase.posts.UpsertPostsUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

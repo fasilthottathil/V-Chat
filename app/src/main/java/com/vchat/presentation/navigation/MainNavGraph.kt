@@ -3,7 +3,6 @@ package com.vchat.presentation.navigation
 import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -25,8 +24,6 @@ import com.vchat.presentation.explore.ExploreViewModel
 import com.vchat.presentation.profile.*
 import com.vchat.presentation.settings.Settings
 import com.vchat.presentation.settings.SettingsViewModel
-import com.vchat.utils.mapObjectTo
-import com.vchat.utils.toJson
 
 /**
  * Created by Fasil on 19/03/23.
