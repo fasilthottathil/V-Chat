@@ -309,4 +309,8 @@ class UserRepositoryImpl @Inject constructor(
         }
         return Response.Error(resources.getString(R.string.something_went_wrong))
     }
+
+    override suspend fun getUserByEmailFromLocal(email: String): UserEntity? {
+        return appDatabase.userDao().getUserByEmail(email)
+    }
 }

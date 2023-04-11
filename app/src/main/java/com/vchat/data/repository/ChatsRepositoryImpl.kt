@@ -119,7 +119,7 @@ class ChatsRepositoryImpl @Inject constructor(
                             .document(userId)
                             .collection(Constants.CHATS)
                             .document(it.documents[0].id)
-                            .update(chat.copy(messageCount = chat.messageCount + 1, message = message).toMap())
+                            .update(chat.copy(messageCount = chat.messageCount + 1, message = message, timestamp = System.currentTimeMillis()).toMap())
                             .await()
                     }.onFailure { throwable ->
                         Timber.e(throwable)
@@ -181,7 +181,7 @@ class ChatsRepositoryImpl @Inject constructor(
                             .document(userId)
                             .collection(Constants.CHATS)
                             .document(it.documents[0].id)
-                            .update(chat.copy(message = message).toMap())
+                            .update(chat.copy(message = message, timestamp = System.currentTimeMillis()).toMap())
                             .await()
                     }.onFailure { throwable ->
                         Timber.e(throwable)

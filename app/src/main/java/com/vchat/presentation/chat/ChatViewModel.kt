@@ -18,6 +18,7 @@ import com.vchat.domain.usecase.chat.UploadMessageImageUseCase
 import com.vchat.domain.usecase.chats.AddMessageToChatUseCase
 import com.vchat.domain.usecase.chats.ClearMessageCountUseCase
 import com.vchat.domain.usecase.chats.IncrementCountAndUpdateMessageUseCase
+import com.vchat.domain.usecase.user.GetUserByEmailFromLocalUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -40,7 +41,8 @@ class ChatViewModel @Inject constructor(
     private val addMessageToChatUseCase: AddMessageToChatUseCase,
     private val clearMessageCountUseCase: ClearMessageCountUseCase,
     private val incrementCountAndUpdateMessageUseCase: IncrementCountAndUpdateMessageUseCase,
-    private val uploadMessageImageUseCase: UploadMessageImageUseCase
+    private val uploadMessageImageUseCase: UploadMessageImageUseCase,
+    private val getUserByEmailFromLocalUseCase: GetUserByEmailFromLocalUseCase
 ) : ViewModel() {
     private val _error: MutableState<String?> = mutableStateOf(null)
     val error: State<String?> get() = _error
@@ -50,6 +52,7 @@ class ChatViewModel @Inject constructor(
     val messages get() = _messages.asStateFlow()
     val userId = appPreferenceManager.getMyId()
     var roomId: String? = null
+    var friendEmail: String? = null
     private val _onSendMessage: MutableState<Boolean> = mutableStateOf(true)
     val onSendMessage: State<Boolean> get() = _onSendMessage
 
@@ -98,6 +101,10 @@ class ChatViewModel @Inject constructor(
                     when (sendMessageUseCase.execute(it, message)) {
                         is Response.Success -> {
                             _onSendMessage.value = true
+                            getUserByEmailFromLocalUseCase.execute(friendEmail.orEmpty())?.let { entity ->
+                                incrementCountAndUpdateMessageUseCase.execute(entity.id, roomId.orEmpty(),message.message)
+                            }
+                            addMessageToChatUseCase.execute(userId.orEmpty(), roomId.orEmpty(), message.message)
                         }
                         is Response.Error -> {
                             _onSendMessage.value = true
@@ -114,17 +121,21 @@ class ChatViewModel @Inject constructor(
                             when (sendMessageUseCase.execute(it, message)) {
                                 is Response.Success -> {
                                     stopLoading()
-                                    _onSendMessage.value = false
+                                    _onSendMessage.value = true
+                                    getUserByEmailFromLocalUseCase.execute(friendEmail.orEmpty())?.let { entity ->
+                                        incrementCountAndUpdateMessageUseCase.execute(entity.id, roomId.orEmpty(),"image")
+                                    }
+                                    addMessageToChatUseCase.execute(userId.orEmpty(), roomId.orEmpty(), "image")
                                 }
                                 is Response.Error -> {
                                     stopLoading()
-                                    _onSendMessage.value = false
+                                    _onSendMessage.value = true
                                 }
                             }
                         }
                         is Response.Error -> {
                             stopLoading()
-                            _onSendMessage.value = false
+                            _onSendMessage.value = true
                             _error.value = response.message
                         }
                     }
@@ -140,4 +151,10 @@ class ChatViewModel @Inject constructor(
     private fun stopLoading() {
         _loading.value = false
     }
+
+    override fun onCleared() {
+        clearMessageCount()
+        super.onCleared()
+    }
+
 }

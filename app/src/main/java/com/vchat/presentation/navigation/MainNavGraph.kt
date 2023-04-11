@@ -196,6 +196,7 @@ fun MainNavGraph(navHostController: NavHostController, modifier: Modifier) {
             val chatEntity = navHostController.previousBackStackEntry?.savedStateHandle?.get<ChatEntity>("chatEntity")
             val chatViewModel: ChatViewModel = hiltViewModel()
             chatViewModel.roomId = chatEntity?.roomId
+            chatViewModel.friendEmail = chatEntity?.email
             chatViewModel.getMessages()
             Chat(
                 error = chatViewModel.error,

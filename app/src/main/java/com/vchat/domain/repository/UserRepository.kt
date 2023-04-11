@@ -21,4 +21,5 @@ interface UserRepository {
     suspend fun updateUser(user: User): Response<UserEntity>
     suspend fun uploadUserImage(profileUri: Uri, userId: String): Response<String>
     suspend fun deleteAccount(userId: String): Response<Unit>
+    suspend fun getUserByEmailFromLocal(email: String): UserEntity?
 }
